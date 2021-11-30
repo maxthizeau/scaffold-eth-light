@@ -1,0 +1,38 @@
+{
+  "name": "my-scaffold-eth",
+  "version": "1.0.0",
+  "main": "index.js",
+  "license": "MIT",
+  "private":"true",
+  "scripts": {
+    "start": "yarn workspace react-app start",
+    "build": "yarn workspace react-app build",    
+    "chain": "yarn workspace hardhat chain",    
+    "compile": "yarn workspace hardhat compile",    
+    "deploy": "yarn workspace hardhat deploy",
+    "postdeploy": "yarn workspace hardhat postdeploy",
+    "export": "yarn workspace hardhat export",
+    "watch": "yarn workspace hardhat  watch",
+    "accounts": "yarn workspace hardhat accounts",
+    "balance": "yarn workspace hardhat balance",
+    "send": "yarn workspace hardhat send",
+    "generate": "yarn workspace hardhat generate",
+    "account": "yarn workspace hardhat account"
+  },
+  "workspaces": {
+    "packages": [
+      "packages/hardhat",
+      "packages/react-app",      
+      "packages/subgraph"
+    ]
+  },
+  "packageManager": "yarn@3.1.0",
+  "devDependencies": {
+    "eslint": "^7.32.0",
+    "prettier": "^2.4.1",
+    "shx": "^0.3.3"
+  },
+  "dependencies": {
+    "react": "^17.0.2"
+  }
+}
