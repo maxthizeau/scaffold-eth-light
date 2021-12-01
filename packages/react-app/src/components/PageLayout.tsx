@@ -79,6 +79,9 @@ export const PageLayout = ({
         <Menu.Item key="/full">
           <Link to="/full">Full Contract</Link>
         </Menu.Item>
+        <Menu.Item key="/lottery">
+          <Link to="/lottery">Lottery</Link>
+        </Menu.Item>
       </Menu>
       {children}
 

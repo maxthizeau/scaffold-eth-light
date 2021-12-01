@@ -18,6 +18,7 @@ import { FullContract } from './views/FullContract'
 import { useAppContracts } from './hooks/useAppContracts'
 // import { useAppContracts } from './hooks/useAppContracts'
 import { NETWORKS } from 'src/config/constants'
+import { Lottery } from './views/Lottery'
 
 const App: FC = () => {
   // 🛰 providers
@@ -75,6 +76,9 @@ const App: FC = () => {
         </Routes>
         <Routes>
           <Route path="/test-page" element={<TestPage />}></Route>
+        </Routes>
+        <Routes>
+          <Route path="/lottery" element={<Lottery />}></Route>
         </Routes>
         <Routes>
           <Route
