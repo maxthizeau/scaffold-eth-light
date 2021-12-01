@@ -9,11 +9,15 @@ import TestPage from './views/TestPage'
 import { PageLayout } from 'src/components/PageLayout'
 
 import { useEthersContext } from 'eth-hooks/context'
-import { useBalance } from 'eth-hooks'
+import { useBalance, useContractLoader, useGasPrice } from 'eth-hooks'
 import { useDexEthPrice } from 'eth-hooks/dapps'
 import { useScaffoldProviders as useScaffoldAppProviders } from 'src/hooks/useScaffoldAppProviders'
 import { useBurnerFallback } from 'src/hooks/useBurnerFallback'
+import { getNetworkInfo } from './helpers/getNetworkInfo'
+import { FullContract } from './views/FullContract'
+import { useAppContracts } from './hooks/useAppContracts'
 // import { useAppContracts } from './hooks/useAppContracts'
+import { NETWORKS } from 'src/config/constants'
 
 const App: FC = () => {
   // 🛰 providers
@@ -33,9 +37,26 @@ const App: FC = () => {
 
   const yourCurrentBalance = useBalance(ethersContext.account ?? '')
 
+  const gasPrice = useGasPrice(
+    ethersContext.chainId,
+    'fast',
+    getNetworkInfo(ethersContext.chainId)
+  )
+
+  const appContractConfig = useAppContracts()
+  const mainnetContracts = useContractLoader(
+    appContractConfig,
+    scaffoldAppProviders.mainnetProvider,
+    NETWORKS['mainnet'].chainId
+  )
+
   return (
     <>
-      <PageLayout scaffoldAppProviders={scaffoldAppProviders} price={ethPrice}>
+      <PageLayout
+        scaffoldAppProviders={scaffoldAppProviders}
+        price={ethPrice}
+        gasPrice={gasPrice ?? 0}
+      >
         <Routes>
           <Route path="/" element={<Home />}></Route>
         </Routes>
@@ -44,6 +65,7 @@ const App: FC = () => {
             path="/debug"
             element={
               <Debug
+                scaffoldAppProviders={scaffoldAppProviders}
                 mainnetProvider={scaffoldAppProviders.mainnetProvider}
                 price={ethPrice}
                 yourCurrentBalance={yourCurrentBalance}
@@ -53,6 +75,18 @@ const App: FC = () => {
         </Routes>
         <Routes>
           <Route path="/test-page" element={<TestPage />}></Route>
+        </Routes>
+        <Routes>
+          <Route
+            path="/full"
+            element={
+              <FullContract
+                scaffoldAppProviders={scaffoldAppProviders}
+                appContractConfig={appContractConfig}
+                mainnetContracts={mainnetContracts}
+              />
+            }
+          ></Route>
         </Routes>
 
         {/* <ThemeSwitcher /> */}

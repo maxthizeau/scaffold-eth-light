@@ -1,10 +1,13 @@
 /* eslint-disable @typescript-eslint/restrict-template-expressions */
-import { ReactElement, useContext, useState } from 'react'
+import { ReactElement, useContext, useEffect, useState } from 'react'
 import { Input, Button, Form } from 'antd'
 import { useAppContracts } from 'src/hooks/useAppContracts'
 import { useContractLoader, useContractReader, useGasPrice } from 'eth-hooks'
 import { useEthersContext } from 'eth-hooks/context'
-import { StaticJsonRpcProvider } from '@ethersproject/providers'
+import {
+  StaticJsonRpcProvider,
+  TransactionRequest,
+} from '@ethersproject/providers'
 import { MyFirstContract } from 'src/generated/contract-types'
 import { transactor, TTransactor } from 'eth-components/functions'
 import { EthComponentsSettingsContext } from 'eth-components/models'
@@ -14,9 +17,14 @@ import {
   TransactionResponse,
 } from '@ethersproject/abstract-provider'
 import { toEth } from 'src/helpers/utils'
+import { formatEther, parseEther } from '@ethersproject/units'
+import { BigNumber } from '@ethersproject/bignumber'
+import { useIsMounted } from 'usehooks-ts'
+import { IScaffoldAppProviders } from '../hooks/useScaffoldAppProviders'
 
 export interface IDebugPageProps {
   mainnetProvider: StaticJsonRpcProvider
+  scaffoldAppProviders: IScaffoldAppProviders
   yourCurrentBalance: any
   price: number
 }
@@ -55,6 +63,23 @@ export const Debug = (
       contractName: 'MyFirstContract',
       functionName: 'purpose',
     }) ?? ''
+
+  // const test = readContracts['MyFirstContract'] as MyFirstContract
+  // const contractBalance = myFirstContractRead.balance()
+
+  const isMounted = useIsMounted()
+  const [contractBalance, setContractBalance] = useState<
+    BigNumber | string | null
+  >(null)
+  useEffect(() => {
+    const callFunc = async () => {
+      if (isMounted() && myFirstContractRead) {
+        const res = await myFirstContractRead.balance()
+        setContractBalance(formatEther(res))
+      }
+    }
+    callFunc()
+  }, [isMounted, purpose, props.scaffoldAppProviders])
 
   const signer = ethersContext.signer
   const address = ethersContext.account ?? ''
@@ -118,19 +143,32 @@ export const Debug = (
       </Form>
       <div style={{ margin: 8 }}>
         <Button
-          onClick={() => {
+          onClick={async () => {
             /* look how we call setPurpose AND send some value along */
-            tx?.(
-              myFirstContractWrite?.setPurpose(
-                '💵 Paying for this one!'
-                // , {value: parseEther('0.001'),}
-              )
+            const res = tx?.(
+              myFirstContractWrite?.setPurpose('💵 Paying for this one!', {
+                value: parseEther('0.002'),
+              }),
+              (update: ITransactionReceiptAndResponse) => {
+                console.log('📡 Transaction Update:', update)
+                if (update && update.status === 1) {
+                  console.log(` 🍾 Transaction ' ${update.hash} ' finished!`)
+                  console.log(
+                    ` ⛽️ ' + ${update.gasUsed}'/'${update.gasLimit}' @ ' ${update.gasPrice}' gwei`
+                  )
+                }
+              }
             )
+            console.log('awaiting metamask/web3 confirm result...', res)
+            console.log(await res)
             /* this will fail until you make the setPurpose function payable */
           }}
         >
           Set Purpose With Value
         </Button>
+      </div>
+      <div>
+        <span>Contract Balance : {contractBalance} ETH</span>
       </div>
     </div>
   )

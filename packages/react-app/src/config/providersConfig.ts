@@ -11,7 +11,7 @@ const DEBUG = true
 // -------------------
 // 📡 What chain are your contracts deployed to? 🤚🏽  Set your target frontend network
 // -------------------
-export const targetNetworkInfo: TNetworkInfo = NETWORKS.rinkeby
+export const targetNetworkInfo: TNetworkInfo = NETWORKS.localhost
 // <------- select your target frontend network (localhost, rinkeby, xdai, mainnet)
 if (DEBUG) console.log('📡 Connecting to Mainnet Ethereum')
 

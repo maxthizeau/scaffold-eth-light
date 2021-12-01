@@ -3,26 +3,26 @@
   "version": "1.0.0",
   "main": "index.js",
   "license": "MIT",
-  "private":"true",
+  "private": "true",
   "scripts": {
-    "start": "yarn workspace react-app start",
-    "build": "yarn workspace react-app build",    
-    "chain": "yarn workspace hardhat chain",    
-    "compile": "yarn workspace hardhat compile",    
-    "deploy": "yarn workspace hardhat deploy",
-    "postdeploy": "yarn workspace hardhat postdeploy",
-    "export": "yarn workspace hardhat export",
-    "watch": "yarn workspace hardhat  watch",
-    "accounts": "yarn workspace hardhat accounts",
-    "balance": "yarn workspace hardhat balance",
-    "send": "yarn workspace hardhat send",
-    "generate": "yarn workspace hardhat generate",
-    "account": "yarn workspace hardhat account"
+    "start": "yarn workspace @my-scaffold-eth/react-app start",
+    "build": "yarn workspace @my-scaffold-eth/react-app build",
+    "chain": "yarn workspace @my-scaffold-eth/hardhat chain",
+    "compile": "yarn workspace @my-scaffold-eth/hardhat compile",
+    "deploy": "yarn workspace @my-scaffold-eth/hardhat deploy",
+    "postdeploy": "yarn workspace @my-scaffold-eth/hardhat postdeploy",
+    "export": "yarn workspace @my-scaffold-eth/hardhat export",
+    "watch": "yarn workspace @my-scaffold-eth/hardhat  watch",
+    "accounts": "yarn workspace @my-scaffold-eth/hardhat accounts",
+    "balance": "yarn workspace @my-scaffold-eth/hardhat balance",
+    "send": "yarn workspace @my-scaffold-eth/hardhat send",
+    "generate": "yarn workspace @my-scaffold-eth/hardhat generate",
+    "account": "yarn workspace @my-scaffold-eth/hardhat account"
   },
   "workspaces": {
     "packages": [
       "packages/hardhat",
-      "packages/react-app",      
+      "packages/react-app",
       "packages/subgraph"
     ]
   },

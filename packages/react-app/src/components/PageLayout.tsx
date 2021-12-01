@@ -5,23 +5,29 @@ import { useLocation, Link } from 'react-router-dom'
 import { Account } from './common/Account'
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { IScaffoldAppProviders } from '../hooks/useScaffoldAppProviders'
+import PageLayoutFooter from './PageLayoutFooter'
+import { FaucetHintButton } from './common/FaucetHintButton'
+import { useGasPrice } from 'eth-hooks'
 
 interface IPageLayoutProps {
   children: ReactNode
   scaffoldAppProviders: IScaffoldAppProviders
   price: number
+  gasPrice: number
 }
 
 export const PageLayout = ({
   children,
   scaffoldAppProviders,
   price,
+  gasPrice,
 }: IPageLayoutProps): ReactElement => {
   const location = useLocation()
 
   // const accountProps : IAccountProps = {
   //   ensProvider
   // }
+
   return (
     <>
       <PageHeader
@@ -70,9 +76,17 @@ export const PageLayout = ({
         <Menu.Item key="/test-page">
           <Link to="/test-page">Test Page</Link>
         </Menu.Item>
+        <Menu.Item key="/full">
+          <Link to="/full">Full Contract</Link>
+        </Menu.Item>
       </Menu>
       {children}
 
+      <PageLayoutFooter
+        price={price}
+        scaffoldAppProviders={scaffoldAppProviders}
+        gasPrice={gasPrice}
+      />
       <ThemeSwitcher />
     </>
   )
