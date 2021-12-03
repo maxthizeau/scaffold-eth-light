@@ -64,7 +64,7 @@ export const FaucetHintButton: FC<IFaucetButton> = (props) => {
       !faucetClicked &&
       faucetAvailable &&
       yourLocalBalance &&
-      min < 0.002 &&
+      min < 0.01 &&
       ethersContext?.account != null
     ) {
       return (
@@ -75,7 +75,7 @@ export const FaucetHintButton: FC<IFaucetButton> = (props) => {
               if (faucetTx && ethersContext?.account != null) {
                 faucetTx({
                   to: ethersContext?.account,
-                  value: parseEther('0.01').toHexString(),
+                  value: parseEther('0.1').toHexString(),
                 })
                   .then(() => setFaucetClicked(true))
                   .catch(() => setFaucetClicked(false))

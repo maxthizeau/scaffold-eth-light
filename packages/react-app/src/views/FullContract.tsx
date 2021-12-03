@@ -36,8 +36,8 @@ export const FullContract: FC<IFullContractProps> = (props) => {
           and give you a form to interact with it locally
         ********** */}
         <GenericContract
-          contractName="MyFirstContract"
-          contract={contractList?.['MyFirstContract']}
+          contractName="Lottery"
+          contract={contractList?.['Lottery']}
           mainnetProvider={props.scaffoldAppProviders.mainnetProvider}
           blockExplorer={props.scaffoldAppProviders.targetNetwork.blockExplorer}
           contractConfig={props.appContractConfig}

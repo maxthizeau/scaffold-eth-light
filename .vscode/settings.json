@@ -56,7 +56,8 @@
       { "directory": "packages/hardhat", "changeProcessCWD": true },
       { "directory": "packages/react-app", "changeProcessCWD": true },
    ],
-   "solidity.packageDefaultDependenciesDirectory": "packages/hardhat/node_modules",
+   "solidity.packageDefaultDependenciesContractsDirectory": "",
+   "solidity.packageDefaultDependenciesDirectory": "node_modules",
    "editor.formatOnSave": true,
    "solidity.formatter": "prettier", // This is the default so it might be missing.
    "[solidity]": {
