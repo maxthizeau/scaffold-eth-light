@@ -4,7 +4,7 @@ import 'antd/dist/antd.css'
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
 import { Home } from './views/Home'
-import { Debug } from './views/Debug'
+
 import TestPage from './views/TestPage'
 import { PageLayout } from 'src/components/PageLayout'
 
@@ -61,19 +61,7 @@ const App: FC = () => {
         <Routes>
           <Route path="/" element={<Home />}></Route>
         </Routes>
-        <Routes>
-          <Route
-            path="/debug"
-            element={
-              <Debug
-                scaffoldAppProviders={scaffoldAppProviders}
-                mainnetProvider={scaffoldAppProviders.mainnetProvider}
-                price={ethPrice}
-                yourCurrentBalance={yourCurrentBalance}
-              />
-            }
-          ></Route>
-        </Routes>
+
         <Routes>
           <Route path="/test-page" element={<TestPage />}></Route>
         </Routes>

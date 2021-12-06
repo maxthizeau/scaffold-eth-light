@@ -26,7 +26,6 @@ const PreviousDrawTab = ({
   allDraws,
   getOwnerTicketsForDraw,
 }: IPreviousDrawTabProps) => {
-  console.log('Length = ', allDraws?.length)
   const [drawShown, setDrawShown] = useState(
     allDraws ? allDraws?.length - 2 : 0
   )
@@ -35,18 +34,22 @@ const PreviousDrawTab = ({
 
   useEffect(() => {
     const callFunc = async () => {
-      console.log('CALL FUNC !')
       const res = await getOwnerTicketsForDraw(drawShown)
       setTicketsOfDrawShown(res)
       let amount = 0
       for (let i = 0; i < res.length; i++) {
         const element = res[i]
-        amount += Number(formatEther(element.claimableAmount))
+        amount += Number(formatEther(element.rewardsAmount))
       }
       setClaimableAmount(amount)
     }
-    // console.log('Call ? ', allDraws, drawShown, allDraws?.length)
-    if (allDraws && drawShown <= allDraws?.length) {
+
+    if (
+      allDraws &&
+      ((allDraws.length === 1 && allDraws[0] && allDraws[0].completed) ||
+        allDraws.length > 1) &&
+      drawShown <= allDraws?.length
+    ) {
       callFunc()
     }
   }, [drawShown, allDraws])
@@ -54,7 +57,7 @@ const PreviousDrawTab = ({
   if (!allDraws) {
     return <p>Loading...</p>
   }
-  if (allDraws.length <= 1)
+  if (allDraws.length <= 1 || allDraws[drawShown] === undefined)
     return (
       <Typography.Title
         level={3}
@@ -161,8 +164,8 @@ const PreviousDrawTab = ({
                 >
                   <span>Status : {item.status}</span>
                   <span>
-                    Claimable Amount : {formatEther(item.claimableAmount)} ETH
-                    {/* Claimable Amount : {formatEther(item.claimableAmount)} ETH */}
+                    Claimable Amount : {formatEther(item.rewardsAmount)} ETH
+                    {/* Claimable Amount : {item.rewardsAmount} ETH */}
                   </span>
                 </div>
               </div>

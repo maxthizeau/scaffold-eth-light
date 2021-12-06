@@ -6,11 +6,12 @@ import Text from 'antd/lib/typography/Text'
 import { BigNumber } from '@ethersproject/bignumber'
 import { round } from 'src/helpers/utils'
 import { splitRatio } from '../../views/Lottery'
+import { formatEther } from '@ethersproject/units'
 
 const { TabPane } = Tabs
 
 interface ICurrentDrawTabProps {
-  contractBalance: string | BigNumber | null
+  contractBalance: string | undefined
   buyTickets: () => void
   tickets: any[] | undefined
   onChange: (value: number) => void
@@ -26,7 +27,9 @@ const CurrentDrawTab = ({
     <>
       <StyledCard title="Balance / Split">
         <div>
-          <Balance>💰 {contractBalance ?? '...'} ETH</Balance>
+          <Balance>
+            💰 {contractBalance ? formatEther(contractBalance) : '...'} ETH
+          </Balance>
           <List
             itemLayout="horizontal"
             dataSource={splitRatio}
@@ -40,10 +43,15 @@ const CurrentDrawTab = ({
                   }
                   description={`Winners split ${Math.round(
                     item.percentOfBalance * 100
-                  )}% of balance (${round(
-                    item.percentOfBalance * Number(contractBalance ?? 0),
-                    6
-                  )} ETH)`}
+                  )}% of balance (${
+                    contractBalance
+                      ? round(
+                          item.percentOfBalance *
+                            Number(formatEther(contractBalance) ?? 0),
+                          6
+                        )
+                      : '...'
+                  } ETH)`}
                 />
               </List.Item>
             )}

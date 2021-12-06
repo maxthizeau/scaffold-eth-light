@@ -7,21 +7,23 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
   const { deploy } = deployments;
   const { deployer } = await getNamedAccounts();
   await deploy('LotteryHelper', {
-    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
-    // args: ["Hello"],
     log: true,
   });
-  await deploy('Lottery', {
-    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
+  await deploy('LotteryFactory', {
     from: deployer,
-    // args: ["Hello"],
     log: true,
   });
   await deploy('LotteryDrawer', {
-    // Learn more about args here: https://www.npmjs.com/package/hardhat-deploy#deploymentsdeploy
     from: deployer,
-    // args: ["Hello"],
+    log: true,
+  });
+  await deploy('LotteryClaimer', {
+    from: deployer,
+    log: true,
+  });
+  await deploy('Lottery', {
+    from: deployer,
     log: true,
   });
 
@@ -34,7 +36,7 @@ const func: DeployFunction = async (hre: HardhatRuntimeEnvironmentExtended) => {
   */
 };
 export default func;
-func.tags = ['Lottery', 'LotteryHelper', 'LotteryDrawer'];
+func.tags = ['LotteryFactory', 'LotteryHelper', 'LotteryDrawer', 'LotteryClaimer', 'Lottery'];
 
 /*
 Tenderly verification

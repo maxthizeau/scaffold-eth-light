@@ -5,7 +5,7 @@ import { Balance } from '../../views/Lottery'
 
 interface IClaimTabProps {
   claimFunction: () => void
-  claimableAmount: string
+  claimableAmount: string | undefined
 }
 
 const ClaimTab = ({ claimFunction, claimableAmount }: IClaimTabProps) => {
@@ -14,7 +14,10 @@ const ClaimTab = ({ claimFunction, claimableAmount }: IClaimTabProps) => {
   // }
   return (
     <>
-      <Balance>💰 You earned : {formatEther(claimableAmount)} ETH</Balance>
+      <Balance>
+        💰 You earned :{' '}
+        {claimableAmount ? formatEther(claimableAmount) : 'Loading...'} ETH
+      </Balance>
       <Button
         type="primary"
         style={{

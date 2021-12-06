@@ -39,4 +39,17 @@ contract LotteryHelper {
 
     return numbers;
   }
+
+  function compareTwoUintArray(uint8[5] memory _drawNumbers, uint8[5] memory _ticketNumbers) internal pure returns (uint256) {
+    uint256 commonNumbers = 0;
+
+    for (uint256 i = 0; i < _drawNumbers.length; i++) {
+      for (uint256 j = 0; j < _ticketNumbers.length; j++) {
+        if (_drawNumbers[i] == _ticketNumbers[j]) {
+          commonNumbers++;
+        }
+      }
+    }
+    return commonNumbers;
+  }
 }

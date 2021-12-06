@@ -8,6 +8,7 @@ import {
 } from 'eth-hooks'
 import { useBlockNumberContext, useEthersContext } from 'eth-hooks/context'
 import React, { ReactElement, useContext } from 'react'
+// import { LotteryFactory as LotteryContract } from 'src/generated/contract-types'
 import { Lottery as LotteryContract } from 'src/generated/contract-types'
 import styled from 'styled-components'
 import { useAppContracts } from '../hooks/useAppContracts'
@@ -23,6 +24,15 @@ import CurrentDrawTab from 'src/components/Lottery/CurrentDrawTab'
 import { isBigNumberish } from '@ethersproject/bignumber/lib/bignumber'
 import LotteryBalances from 'src/components/Lottery/LotteryBalances'
 import ClaimTab from 'src/components/Lottery/ClaimTab'
+import { useContractReaderWithFormatter } from 'src/hooks/useContractReaderWithFormatter'
+import {
+  formatArrayToBoolean,
+  formatBalances,
+  formatDraws,
+  formatToString,
+  formatToTimestamp,
+} from 'src/helpers/formatters'
+
 const { TabPane } = Tabs
 
 export interface Draw {
@@ -43,9 +53,10 @@ export enum TicketStatus {
 export interface Ticket {
   id: number
   numbers: number[]
-  lotteryNumber: number
+  drawNumber: number
+  claimed: boolean
   status: TicketStatus
-  claimableAmount: any
+  rewardsAmount: string
 }
 
 export interface ContractBalances {
@@ -101,7 +112,7 @@ export const Balance = styled.div`
   text-align: center;
 `
 
-const deadline = Date.now() + 1000 * 60 * 60 * 24 * 2 + 1000 * 30 // Moment is also OK
+// let deadline = Date.now() + 1000 * 60 * 60 * 24 * 2 + 1000 * 30 // Moment is also OK
 
 export const Lottery = (): ReactElement => {
   const ethersContext = useEthersContext()
@@ -115,7 +126,6 @@ export const Lottery = (): ReactElement => {
   const tx = transactor(ethComponentsSettings, ethersContext?.signer, gasPrice)
 
   const lotteryWriteContract = writeContracts['Lottery'] as LotteryContract
-
   const lotteryReadContract = readContracts['Lottery'] as LotteryContract
 
   const [amountToBuy, setAmountToBuy] = useState(1)
@@ -134,6 +144,7 @@ export const Lottery = (): ReactElement => {
     const result = await tx?.(lotteryWriteContract.claim())
   }
 
+  // Function called when user is looking the previous draws. It request and format tickets of the draw
   const getOwnerTicketsForDraw = async (drawId: number): Promise<Ticket[]> => {
     const result = await lotteryReadContract._getTicketsOfOwnerForDraw(
       ethersContext.account ?? '',
@@ -147,9 +158,8 @@ export const Lottery = (): ReactElement => {
     if (result[0]) {
       for (let i = 0; i < result.length; i++) {
         const ticket = result[i]
-
         let status: TicketStatus
-        switch (ticket[2]) {
+        switch (ticket[3]) {
           case 0:
             status = TicketStatus.Pending
             break
@@ -174,9 +184,10 @@ export const Lottery = (): ReactElement => {
         tickets.push({
           id: i,
           numbers: ticket[0],
-          lotteryNumber: ticket[1].toNumber(),
+          drawNumber: ticket[1].toNumber(),
+          claimed: ticket[2],
           status,
-          claimableAmount: ticket[3],
+          rewardsAmount: ticket[4].toString(),
         })
       }
     }
@@ -194,54 +205,39 @@ export const Lottery = (): ReactElement => {
     functionArgs: [ethersContext.account],
   })
 
-  const [draws, setDraws] = useState<Draw[]>([])
+  const nextLotteryTime = useContractReaderWithFormatter<string, number>(
+    lotteryReadContract,
+    {
+      contractName: 'Lottery',
+      functionName: 'nextLotteryAt',
+    },
+    formatToTimestamp
+  )
+  console.log(nextLotteryTime)
+  console.log(Date.now() / 1000)
+  // deadline = deadline + 1
 
-  const allDraws = useContractReader<any[]>(lotteryReadContract, {
-    contractName: 'Lottery',
-    functionName: '_getAllDraws',
-  })
+  const draws = useContractReaderWithFormatter<any[], Draw[]>(
+    lotteryReadContract,
+    {
+      contractName: 'Lottery',
+      functionName: '_getAllDraws',
+    },
+    formatDraws
+  )
 
-  useEffect(() => {
-    const callFunc = () => {
-      if (allDraws && allDraws[0]) {
-        const tmpDraws: Draw[] = []
-        for (let i = 0; i < allDraws[0].length; i++) {
-          const draw = allDraws[0][i]
+  const contractBalance = useContractReaderWithFormatter<string, string>(
+    lotteryReadContract,
+    {
+      contractName: 'Lottery',
+      functionName: '_getBalance',
+    },
+    formatToString
+  )
+  // const contractBalance = ''
 
-          const id = Number(draw[0])
-          tmpDraws.push({ id, numbers: draw[1], completed: draw[2] })
-        }
-        setDraws(tmpDraws)
-      }
-    }
-    void callFunc()
-  }, [allDraws])
-
-  // const currentDraw = useContractReader<any[]>(
-  //   lotteryReadContract,
-  //   {
-  //     contractName: 'Lottery',
-  //     functionName: '_getCurrentDraw',
-  //   },
-  //   // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-  //   (_value: any[] | undefined) => _value?.[0]
-  // )
-
+  // TODO : factorize below
   const blockNumber = useBlockNumberContext()
-  const isMounted = useIsMounted()
-  const [contractBalance, setContractBalance] = useState<
-    BigNumber | string | null
-  >(null)
-  useEffect(() => {
-    const callFunc = async () => {
-      if (lotteryReadContract) {
-        const res = await lotteryReadContract._getBalance()
-        setContractBalance(formatEther(res))
-      }
-    }
-    callFunc()
-  }, [isMounted, lotteryReadContract, blockNumber])
-
   const [tickets, setTickets] = useState<any[] | undefined>()
   useEffect(() => {
     const callFunc = async () => {
@@ -259,41 +255,40 @@ export const Lottery = (): ReactElement => {
     void callFunc()
   }, [lotteryReadContract, ownerTickets, blockNumber])
 
-  const [allBalances, setAllBalances] = useState<ContractBalances>()
-  useEffect(() => {
-    const callFunc = async () => {
-      if (lotteryReadContract) {
-        const res = await lotteryReadContract._getAllBalances()
-        if (res) {
-          const balances: ContractBalances = {
-            fullBalance: res[0].toString(),
-            claimableBalance: res[1].toString(),
-            devFeeBalance: res[2].toString(),
-            stakingBalance: res[3].toString(),
-            burnBalance: res[4].toString(),
-          }
-          setAllBalances(balances)
-        }
-      }
-    }
-    void callFunc()
-  }, [lotteryReadContract, blockNumber])
+  const allBalances = useContractReaderWithFormatter<any[], ContractBalances>(
+    lotteryReadContract,
+    {
+      contractName: 'Lottery',
+      functionName: '_getAllBalances',
+    },
+    formatBalances
+  )
 
-  const [claimableAmountOfAddress, setClaimableAmountOfAddress] =
-    useState<string>('')
-  useEffect(() => {
-    const callFunc = async () => {
-      if (lotteryReadContract && ethersContext.account) {
-        const res = await lotteryReadContract._getClaimableAmountOfAddress(
-          ethersContext.account ?? ''
-        )
-        if (res) {
-          setClaimableAmountOfAddress(res.toString())
-        }
-      }
-    }
-    void callFunc()
-  }, [lotteryReadContract, blockNumber])
+  const claimableAmountOfAddress = useContractReaderWithFormatter<
+    string,
+    string
+  >(
+    lotteryReadContract,
+    {
+      contractName: 'Lottery',
+      functionName: 'getClaimableAmountOfAddress',
+      functionArgs: [ethersContext.account ?? ''],
+    },
+    formatToString
+  )
+
+  // const [needToDraw, setNeedToDraw] = useState<boolean>(
+  //   nextLotteryTime ? nextLotteryTime < Date.now() : false
+  // )
+  const needToDraw = useContractReaderWithFormatter<boolean[], boolean>(
+    lotteryReadContract,
+    {
+      contractName: 'Lottery',
+      functionName: 'needToDraw',
+    },
+    formatArrayToBoolean
+  )
+  console.log(needToDraw)
 
   return (
     <div
@@ -307,19 +302,37 @@ export const Lottery = (): ReactElement => {
       }}
     >
       <h2>Lottery</h2>
-      <Countdown
-        title="Next draw in..."
-        value={deadline}
-        onFinish={() => console.log('Done')}
-        style={{ position: 'absolute', top: 20, right: 20 }}
-      />
-      <Button
-        style={{ width: '100%', margin: '30px auto' }}
-        type="dashed"
-        onClick={draw}
-      >
-        Draw
-      </Button>
+      {needToDraw === false ? (
+        <Countdown
+          title="Next draw in..."
+          value={nextLotteryTime}
+          onFinish={() => console.log('done')}
+          style={{ position: 'absolute', top: 20, right: 20 }}
+        />
+      ) : (
+        <p
+          style={{
+            position: 'absolute',
+            top: 20,
+            right: 20,
+            color: 'rgba(255,255,255,.85)',
+            fontSize: '24px',
+          }}
+        >
+          Waiting for draw...
+        </p>
+      )}
+
+      {needToDraw && (
+        <Button
+          style={{ width: '100%', margin: '30px auto' }}
+          type="dashed"
+          onClick={draw}
+        >
+          {`Don't want to wait admin ? Draw yourself, it's time !`}
+        </Button>
+      )}
+
       <Tabs defaultActiveKey="1" centered>
         <TabPane tab="Next draw" key="1">
           <CurrentDrawTab
