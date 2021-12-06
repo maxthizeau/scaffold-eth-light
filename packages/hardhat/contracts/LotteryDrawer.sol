@@ -13,11 +13,11 @@ contract LotteryDrawer is LotteryFactory {
   uint32 constant zeroAsU32 = 0;
 
   // Saving them as constant to save in bytecode contract, saving some gas ?
-  uint256 constant twoWinningNumbersSplit = 900; // 9%
-  uint256 constant threeWinningNumbersSplit = 1400; // 14%
-  uint256 constant fourWinningNumbersSplit = 2400; // 24%
-  uint256 constant fiveWinningNumbersSplit = 4900; // 49%
-  uint256 constant devFeePercent = 75; // 0.75%
+  uint256 constant twoWinningNumbersSplit = 1000; // 10%
+  uint256 constant threeWinningNumbersSplit = 1500; // 15%
+  uint256 constant fourWinningNumbersSplit = 2500; // 25%
+  uint256 constant fiveWinningNumbersSplit = 4500; // 45%
+  uint256 constant devFeePercent = 150; // 0.75%
   uint256 constant burnPercent = 150; // 1.5%
   uint256 constant stakingPercent = 200; // 2%
 

@@ -1,8 +1,9 @@
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
 import './LotteryHelper.sol';
+import '@openzeppelin/contracts/access/Ownable.sol';
 
-contract LotteryFactory is LotteryHelper {
+contract LotteryFactory is LotteryHelper, Ownable {
   using SafeMath for uint256;
 
   uint256 public lotteryCount;
@@ -49,11 +50,21 @@ contract LotteryFactory is LotteryHelper {
     // ownerDrawsTicketCount[_owner][lotteryCountMem]++;
   }
 
-  function buyMultipleRandomTicket(uint256 amount) public payable {
-    require(msg.value / amount == ticketPrice, 'Value given is different from the ticket price');
-    for (uint256 i = 0; i < amount; i++) {
+  function buyMultipleRandomTicket(uint256 _amount) public payable {
+    require(msg.value / _amount == ticketPrice, 'Value given is different from the ticket price');
+    for (uint256 i = 0; i < _amount; i++) {
       buyRandomTicket(msg.sender, i);
     }
+  }
+
+  function setTicketPrice(uint256 _newPrice) external onlyOwner {
+    ticketPrice = _newPrice;
+  }
+
+  function withdraw() external onlyOwner {
+    (bool sent, ) = owner().call{value: devFeeBalance}('');
+    devFeeBalance = 0;
+    require(sent, 'Failed to send Ether');
   }
 
   function _getTicketsByOwner(address _owner) external view returns (uint256[] memory) {

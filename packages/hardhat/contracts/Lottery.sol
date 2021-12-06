@@ -23,8 +23,7 @@ contract Lottery is LotteryClaimer {
     return block.timestamp.sub(draws[lotteryCount].startedAt) >= delay;
   }
 
-  // Ownership : Owner can :
-  // - Change delay
-  // - Change staking, burning, dev fee (keeping it a 5 %)
-  // - Withdraw dev fee
+  function setDelay(uint256 _newDelay) external onlyOwner {
+    delay = _newDelay;
+  }
 }
