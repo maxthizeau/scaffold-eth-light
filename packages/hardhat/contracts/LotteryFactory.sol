@@ -3,6 +3,8 @@ pragma solidity >=0.8.0 <0.9.0;
 import './LotteryHelper.sol';
 
 contract LotteryFactory is LotteryHelper {
+  using SafeMath for uint256;
+
   uint256 public lotteryCount;
   uint256 public ticketPrice = 0.005 ether;
   uint256 claimableBalance = 0;
@@ -40,10 +42,10 @@ contract LotteryFactory is LotteryHelper {
     uint256 lotteryCountMem = lotteryCount;
     uint8[5] memory numbers = generateRandomTicketNumbers(lotteryCountMem + _randomArg);
     tickets.push(Ticket(numbers, lotteryCountMem, false));
-    uint256 id = tickets.length - 1;
+    uint256 id = tickets.length.sub(1);
     ticketToOwner[id] = _owner;
     drawToTickets[lotteryCountMem].push(id);
-    ownerTicketCount[_owner]++;
+    ownerTicketCount[_owner] = ownerTicketCount[_owner].add(1);
     // ownerDrawsTicketCount[_owner][lotteryCountMem]++;
   }
 
@@ -60,7 +62,7 @@ contract LotteryFactory is LotteryHelper {
     for (uint256 i = 0; i < tickets.length; i++) {
       if (ticketToOwner[i] == _owner) {
         result[counter] = i;
-        counter++;
+        counter = counter.add(1);
       }
     }
     return result;

@@ -1,12 +1,12 @@
 pragma solidity >=0.8.0 <0.9.0;
 //SPDX-License-Identifier: MIT
 
-// import 'hardhat/console.sol';
+import 'hardhat/console.sol';
 import './LotteryDrawer.sol';
 
-// import './LotteryHelper.sol';
-
 contract LotteryClaimer is LotteryDrawer {
+  using SafeMath for uint256;
+
   struct TicketWithInfo {
     uint8[5] numbers;
     uint256 drawNumber;
@@ -21,11 +21,11 @@ contract LotteryClaimer is LotteryDrawer {
       if (ticketToOwner[i] == msg.sender && tickets[i].claimed == false) {
         tickets[i].claimed = true;
         uint256 commonNumbers = compareTwoUintArray(draws[tickets[i].drawNumber].numbers, tickets[i].numbers);
-        claimableAmount += draws[tickets[i].drawNumber].rewardsByWinningNumber[commonNumbers];
+        claimableAmount = claimableAmount.add(draws[tickets[i].drawNumber].rewardsByWinningNumber[commonNumbers]);
       }
     }
     (bool sent, ) = msg.sender.call{value: claimableAmount}('');
-    claimableBalance -= claimableAmount;
+    claimableBalance = claimableBalance.sub(claimableAmount);
     require(sent, 'Failed to send Ether');
     return claimableAmount;
   }
@@ -36,7 +36,7 @@ contract LotteryClaimer is LotteryDrawer {
     for (uint256 i = 0; i < tickets.length; i++) {
       if (ticketToOwner[i] == _address && tickets[i].claimed == false) {
         uint256 commonNumbers = compareTwoUintArray(draws[tickets[i].drawNumber].numbers, tickets[i].numbers);
-        claimableAmount += draws[tickets[i].drawNumber].rewardsByWinningNumber[commonNumbers];
+        claimableAmount = claimableAmount.add(draws[tickets[i].drawNumber].rewardsByWinningNumber[commonNumbers]);
       }
     }
     return claimableAmount;
@@ -93,7 +93,7 @@ contract LotteryClaimer is LotteryDrawer {
           currentTicketId
         );
         result[counter] = TicketWithInfo(numbers, drawNumber, claimed, status, rewardsAmount);
-        counter++;
+        counter = counter.add(1);
       }
     }
     return result;
@@ -101,13 +101,21 @@ contract LotteryClaimer is LotteryDrawer {
 
   function _getCurrentDrawTicketsOfOwner(address _owner) external view returns (uint256[] memory) {
     uint256 ownerTicketCountForDraw = _getOwnerTicketCountForDraw(_owner, lotteryCount);
+
+    // console.log('Count : ', ownerTicketCountForDraw);
+    // console.log('Count : ', tickets.length);
     uint256[] memory ticketsOfOwner = new uint256[](ownerTicketCountForDraw);
     uint256 counter = 0;
 
     for (uint256 i = 0; i < drawToTickets[lotteryCount].length; i++) {
       if (_owner == ticketToOwner[drawToTickets[lotteryCount][i]]) {
+        // console.log(lotteryCount);
+        // console.log(i);
+        // console.log(drawToTickets[lotteryCount].length);
+        // console.log(drawToTickets[lotteryCount][i]);
+        // console.log(counter);
         ticketsOfOwner[counter] = drawToTickets[lotteryCount][i];
-        counter++;
+        counter = counter.add(1);
       }
     }
 
@@ -118,7 +126,7 @@ contract LotteryClaimer is LotteryDrawer {
     uint256 ownerTicketCountForDraw = 0;
     for (uint256 i = 0; i < drawToTickets[_drawId].length; i++) {
       if (ticketToOwner[drawToTickets[_drawId][i]] == _owner) {
-        ownerTicketCountForDraw++;
+        ownerTicketCountForDraw = ownerTicketCountForDraw.add(1);
       }
     }
     return ownerTicketCountForDraw;

@@ -7,6 +7,8 @@ import './LotteryFactory.sol';
 // import './LotteryHelper.sol';
 
 contract LotteryDrawer is LotteryFactory {
+  using SafeMath for uint256;
+
   uint256 constant zeroAsU256 = 0;
   uint32 constant zeroAsU32 = 0;
 
@@ -39,7 +41,7 @@ contract LotteryDrawer is LotteryFactory {
   }
 
   function nextDraw() internal {
-    lotteryCount++;
+    lotteryCount = lotteryCount.add(1);
     uint256[6] memory rewardsByWinningNumber = [zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256];
     uint32[6] memory winnersByWinningNumber = [zeroAsU32, zeroAsU32, zeroAsU32, zeroAsU32, zeroAsU32, zeroAsU32];
 
@@ -47,7 +49,7 @@ contract LotteryDrawer is LotteryFactory {
   }
 
   function processDraw() internal returns (bool) {
-    uint256 drawCount = draws.length - 1;
+    uint256 drawCount = draws.length.sub(1);
     uint8[5] memory drawNumbers = generateRandomTicketNumbers(drawCount);
     uint32[6] memory winnersByWinningNumber = [uint32(0), uint32(0), uint32(0), uint32(0), uint32(0), uint32(0)];
     uint256[6] memory rewardsByWinningNumber = [zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256];
@@ -79,36 +81,34 @@ contract LotteryDrawer is LotteryFactory {
 
     // Calculate balance to add to every winner
 
-    rewardsByWinningNumber[2] = winnersByWinningNumber[2] > 0 ? ((balance / 10000) * twoWinningNumbersSplit) / winnersByWinningNumber[2] : 0;
-    rewardsByWinningNumber[3] = winnersByWinningNumber[3] > 0 ? ((balance / 10000) * threeWinningNumbersSplit) / winnersByWinningNumber[3] : 0;
-    rewardsByWinningNumber[4] = winnersByWinningNumber[4] > 0 ? ((balance / 10000) * fourWinningNumbersSplit) / winnersByWinningNumber[4] : 0;
-    rewardsByWinningNumber[5] = winnersByWinningNumber[5] > 0 ? ((balance / 10000) * fiveWinningNumbersSplit) / winnersByWinningNumber[5] : 0;
-    uint256 devFeeBalanceToAdd = ((balance / 10000) * devFeePercent);
-    uint256 stakingBalanceToAdd = ((balance / 10000) * stakingPercent);
-    uint256 burnBalanceToAdd = ((balance / 10000) * burnPercent);
+    rewardsByWinningNumber[2] = winnersByWinningNumber[2] > 0 ? ((balance.div(10000)).mul(twoWinningNumbersSplit)).div(winnersByWinningNumber[2]) : 0;
+    rewardsByWinningNumber[3] = winnersByWinningNumber[3] > 0 ? ((balance.div(10000)).mul(threeWinningNumbersSplit)).div(winnersByWinningNumber[3]) : 0;
+    rewardsByWinningNumber[4] = winnersByWinningNumber[4] > 0 ? ((balance.div(10000)).mul(fourWinningNumbersSplit)).div(winnersByWinningNumber[4]) : 0;
+    rewardsByWinningNumber[5] = winnersByWinningNumber[5] > 0 ? ((balance.div(10000)).mul(fiveWinningNumbersSplit)).div(winnersByWinningNumber[5]) : 0;
+    uint256 devFeeBalanceToAdd = ((balance.div(10000)).mul(devFeePercent));
+    uint256 stakingBalanceToAdd = ((balance.div(10000)).mul(stakingPercent));
+    uint256 burnBalanceToAdd = ((balance.div(10000)).mul(burnPercent));
 
     // console.log(rewardsByWinningNumber[2], rewardsByWinningNumber[3], rewardsByWinningNumber[4]);
 
     // Store values
-    devFeeBalance += devFeeBalanceToAdd;
-    stakingBalance += stakingBalanceToAdd;
-    burnBalance += burnBalanceToAdd;
-    claimableBalance +=
-      rewardsByWinningNumber[2] *
-      winnersByWinningNumber[2] +
-      rewardsByWinningNumber[3] *
-      winnersByWinningNumber[3] +
-      rewardsByWinningNumber[4] *
-      winnersByWinningNumber[4] +
-      rewardsByWinningNumber[5] *
-      winnersByWinningNumber[5];
+    devFeeBalance = devFeeBalance.add(devFeeBalanceToAdd);
+    stakingBalance = stakingBalance.add(stakingBalanceToAdd);
+    burnBalance = burnBalance.add(burnBalanceToAdd);
+    claimableBalance = claimableBalance.add(
+      rewardsByWinningNumber[2]
+        .mul(winnersByWinningNumber[2])
+        .add(rewardsByWinningNumber[3].mul(winnersByWinningNumber[3]))
+        .add(rewardsByWinningNumber[4].mul(winnersByWinningNumber[4]))
+        .add(rewardsByWinningNumber[5].mul(winnersByWinningNumber[5]))
+    );
 
-    draws[draws.length - 1].completed = true;
-    draws[draws.length - 1].numbers = drawNumbers;
-    draws[draws.length - 1].rewardBalanceAtDraw = balance;
-    draws[draws.length - 1].rewardsByWinningNumber = rewardsByWinningNumber;
-    draws[draws.length - 1].winnersByWinningNumber = winnersByWinningNumber;
-    draws[draws.length - 1].numbers = drawNumbers;
+    draws[drawCount].completed = true;
+    draws[drawCount].numbers = drawNumbers;
+    draws[drawCount].rewardBalanceAtDraw = balance;
+    draws[drawCount].rewardsByWinningNumber = rewardsByWinningNumber;
+    draws[drawCount].winnersByWinningNumber = winnersByWinningNumber;
+    draws[drawCount].numbers = drawNumbers;
 
     // draws[draws.length] = currentDraw; // Storage
     nextDraw();
@@ -122,7 +122,7 @@ contract LotteryDrawer is LotteryFactory {
     uint256 counter = 0;
     for (uint256 i = 0; i < draws.length; i++) {
       _draws[counter] = draws[i];
-      counter++;
+      counter = counter.add(1);
     }
     return _draws;
   }
@@ -132,6 +132,6 @@ contract LotteryDrawer is LotteryFactory {
   }
 
   function _getCurrentDraw() external view returns (Draw memory) {
-    return draws[draws.length - 1];
+    return draws[draws.length.sub(1)];
   }
 }
