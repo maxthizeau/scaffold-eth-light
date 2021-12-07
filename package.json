@@ -7,7 +7,9 @@
   "scripts": {
     "start": "yarn workspace @my-scaffold-eth/react-app start",
     "build": "yarn workspace @my-scaffold-eth/react-app build",
+    "test": "yarn workspace @my-scaffold-eth/hardhat test",
     "chain": "yarn workspace @my-scaffold-eth/hardhat chain",
+    "copytypes": "yarn workspace @my-scaffold-eth/hardhat copytypes",
     "compile": "yarn workspace @my-scaffold-eth/hardhat compile",
     "deploy": "yarn workspace @my-scaffold-eth/hardhat deploy",
     "postdeploy": "yarn workspace @my-scaffold-eth/hardhat postdeploy",

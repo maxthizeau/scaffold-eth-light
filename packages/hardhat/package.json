@@ -8,6 +8,7 @@
     "test": "hardhat test --network hardhat",
     "compile": "hardhat compile",
     "deploy": "hardhat deploy --export-all ../react-app/src/generated/contracts/hardhat_contracts.json",
+    "copytypes": "hardhat copyTypes",
     "export": "hardhat export --export-all ../react-app/src/generated/contracts/hardhat_contracts.json",
     "postdeploy": "hardhat run scripts/publish.ts",
     "watch": "node scripts/watch.ts",
