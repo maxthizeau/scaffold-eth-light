@@ -8,6 +8,7 @@ export const ETHERSCAN_KEY = 'DNXJA8RX2Q3VZ4URQIWP7Z68CJXQZSC6AW'
 export const BLOCKNATIVE_DAPPID = 'aaaf23a3-a81d-4635-8107-f19fb3b75c92'
 
 export const ALCHEMY_KEY = 'oKxs-03sij-U_N0iOlrSsZFr29-IqbuF'
+export const COIN_NAME = 'LTY'
 
 export declare type TNetworkInfo = {
   name: string
@@ -30,6 +31,7 @@ export type TNetworkNames =
   | 'xdai'
   | 'matic'
   | 'mumbai'
+  | 'neon'
 
 export const NETWORKS: Record<TNetworkNames, TNetworkInfo> = {
   localhost: {
@@ -110,6 +112,16 @@ export const NETWORKS: Record<TNetworkNames, TNetworkInfo> = {
     rpcUrl: 'https://rpc-mumbai.maticvigil.com',
     faucet: 'https://faucet.matic.network/',
     blockExplorer: 'https://mumbai-explorer.matic.today/',
+  },
+  neon: {
+    name: 'neon',
+    color: '#92D9FA',
+    chainId: 245022926,
+    // price: 1,
+    // gasPrice: 1000000000,
+    rpcUrl: 'https://proxy.devnet.neonlabs.org/solana',
+    // faucet: 'https://neon-labs.org/',
+    blockExplorer: 'https://neon-labs.org/',
   },
 }
 

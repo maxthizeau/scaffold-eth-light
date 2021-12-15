@@ -13,30 +13,41 @@ contract LotteryClaimer is LotteryDrawer {
     bool claimed;
     TicketStatus ticketStatus;
     uint256 rewardsAmount;
+    uint256 id;
   }
+
+  constructor(address _LTY) LotteryDrawer(_LTY) {}
 
   function claim() public payable returns (uint256) {
     uint256 claimableAmount = 0;
-    for (uint256 i = 0; i < tickets.length; i++) {
-      if (ticketToOwner[i] == msg.sender && tickets[i].claimed == false) {
-        tickets[i].claimed = true;
-        uint256 commonNumbers = compareTwoUintArray(draws[tickets[i].drawNumber].numbers, tickets[i].numbers);
-        claimableAmount = claimableAmount.add(draws[tickets[i].drawNumber].rewardsByWinningNumber[commonNumbers]);
-      }
+    // Ticket[] memory _tickets = tickets;
+    uint256[] memory claimableTicketsOfOwner = ownerToClaimableTickets[msg.sender];
+    for (uint256 i = 0; i < claimableTicketsOfOwner.length; i++) {
+      Ticket memory _ticket = tickets[claimableTicketsOfOwner[i]];
+      // if (_ticket.claimed == false && ticketToOwner[i] == msg.sender) {
+      // tickets[i].claimed = true;
+      Draw memory draw = draws[_ticket.drawNumber];
+      uint256 commonNumbers = compareTwoUintArray(draw.numbers, _ticket.numbers);
+      claimableAmount = claimableAmount.add(draw.rewardsByWinningNumber[commonNumbers]);
+      // }
     }
-    (bool sent, ) = msg.sender.call{value: claimableAmount}('');
+    TransferHelper.safeTransfer(LTY, msg.sender, claimableAmount);
+    ownerToClaimableTickets[msg.sender] = new uint256[](0);
     claimableBalance = claimableBalance.sub(claimableAmount);
-    require(sent, 'Failed to send Ether');
+    // (bool sent, ) = msg.sender.call{value: claimableAmount}('');
+    // require(sent, 'Failed to send Ether');
     return claimableAmount;
   }
 
   // Getters
   function getClaimableAmountOfAddress(address _address) external view returns (uint256) {
     uint256 claimableAmount = 0;
-    for (uint256 i = 0; i < tickets.length; i++) {
-      if (ticketToOwner[i] == _address && tickets[i].claimed == false) {
-        uint256 commonNumbers = compareTwoUintArray(draws[tickets[i].drawNumber].numbers, tickets[i].numbers);
-        claimableAmount = claimableAmount.add(draws[tickets[i].drawNumber].rewardsByWinningNumber[commonNumbers]);
+    uint256[] memory claimableTicketsOfOwner = ownerToClaimableTickets[_address];
+    for (uint256 i = 0; i < claimableTicketsOfOwner.length; i++) {
+      Ticket memory _ticket = tickets[claimableTicketsOfOwner[i]];
+      if (ticketToOwner[claimableTicketsOfOwner[i]] == _address) {
+        uint256 commonNumbers = compareTwoUintArray(draws[_ticket.drawNumber].numbers, _ticket.numbers);
+        claimableAmount = claimableAmount.add(draws[_ticket.drawNumber].rewardsByWinningNumber[commonNumbers]);
       }
     }
     return claimableAmount;
@@ -45,10 +56,10 @@ contract LotteryClaimer is LotteryDrawer {
   function getClaimableAmountOfTicket(uint256 _ticketId) public view returns (uint256) {
     uint256 claimableAmount = 0;
 
-    if (tickets[_ticketId].claimed == false) {
-      uint256 commonNumbers = compareTwoUintArray(draws[tickets[_ticketId].drawNumber].numbers, tickets[_ticketId].numbers);
-      claimableAmount = draws[tickets[_ticketId].drawNumber].rewardsByWinningNumber[commonNumbers];
-    }
+    // if (tickets[_ticketId].claimed == false) {
+    uint256 commonNumbers = compareTwoUintArray(draws[tickets[_ticketId].drawNumber].numbers, tickets[_ticketId].numbers);
+    claimableAmount = draws[tickets[_ticketId].drawNumber].rewardsByWinningNumber[commonNumbers];
+    // }
 
     return claimableAmount;
   }
@@ -75,7 +86,7 @@ contract LotteryClaimer is LotteryDrawer {
       claimableAmount = commonNumbers > 1 ? draws[tickets[_ticketId].drawNumber].rewardsByWinningNumber[commonNumbers] : 0;
     }
 
-    return (ticket.numbers, ticket.drawNumber, ticket.claimed, status, claimableAmount);
+    return (ticket.numbers, ticket.drawNumber, isTicketClaimed(_ticketId), status, claimableAmount);
   }
 
   function _getTicketsOfOwnerForDraw(address _owner, uint256 _drawId) external view returns (TicketWithInfo[] memory) {
@@ -92,29 +103,25 @@ contract LotteryClaimer is LotteryDrawer {
         (uint8[5] memory numbers, uint256 drawNumber, bool claimed, TicketStatus status, uint256 rewardsAmount) = getTicketWithRewardsAndStatus(
           currentTicketId
         );
-        result[counter] = TicketWithInfo(numbers, drawNumber, claimed, status, rewardsAmount);
+        result[counter] = TicketWithInfo(numbers, drawNumber, claimed, status, rewardsAmount, i);
         counter = counter.add(1);
       }
     }
     return result;
   }
 
-  function _getCurrentDrawTicketsOfOwner(address _owner) external view returns (uint256[] memory) {
+  function _getCurrentDrawTicketsOfOwner(address _owner) external view returns (TicketWithInfo[] memory) {
     uint256 ownerTicketCountForDraw = _getOwnerTicketCountForDraw(_owner, lotteryCount);
 
-    // console.log('Count : ', ownerTicketCountForDraw);
-    // console.log('Count : ', tickets.length);
-    uint256[] memory ticketsOfOwner = new uint256[](ownerTicketCountForDraw);
+    TicketWithInfo[] memory ticketsOfOwner = new TicketWithInfo[](ownerTicketCountForDraw);
     uint256 counter = 0;
 
     for (uint256 i = 0; i < drawToTickets[lotteryCount].length; i++) {
       if (_owner == ticketToOwner[drawToTickets[lotteryCount][i]]) {
-        // console.log(lotteryCount);
-        // console.log(i);
-        // console.log(drawToTickets[lotteryCount].length);
-        // console.log(drawToTickets[lotteryCount][i]);
-        // console.log(counter);
-        ticketsOfOwner[counter] = drawToTickets[lotteryCount][i];
+        (uint8[5] memory numbers, uint256 drawNumber, bool claimed, TicketStatus status, uint256 rewardsAmount) = getTicketWithRewardsAndStatus(
+          drawToTickets[lotteryCount][i]
+        );
+        ticketsOfOwner[counter] = TicketWithInfo(numbers, drawNumber, claimed, status, rewardsAmount, i);
         counter = counter.add(1);
       }
     }

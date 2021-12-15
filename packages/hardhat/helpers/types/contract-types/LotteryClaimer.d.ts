@@ -22,6 +22,7 @@ import type { TypedEventFilter, TypedEvent, TypedListener } from "./common";
 
 interface LotteryClaimerInterface extends ethers.utils.Interface {
   functions: {
+    "LTY()": FunctionFragment;
     "_getAllBalances()": FunctionFragment;
     "_getAllDraws()": FunctionFragment;
     "_getBalance()": FunctionFragment;
@@ -32,8 +33,10 @@ interface LotteryClaimerInterface extends ethers.utils.Interface {
     "_getTicket(uint256)": FunctionFragment;
     "_getTicketsByOwner(address)": FunctionFragment;
     "_getTicketsOfOwnerForDraw(address,uint256)": FunctionFragment;
+    "buyLottyToken()": FunctionFragment;
     "buyMultipleRandomTicket(uint256)": FunctionFragment;
     "claim()": FunctionFragment;
+    "drawToTicketCount(uint256)": FunctionFragment;
     "drawToTickets(uint256,uint256)": FunctionFragment;
     "draws(uint256)": FunctionFragment;
     "getClaimableAmountOfAddress(address)": FunctionFragment;
@@ -41,15 +44,19 @@ interface LotteryClaimerInterface extends ethers.utils.Interface {
     "getTicketWithRewardsAndStatus(uint256)": FunctionFragment;
     "lotteryCount()": FunctionFragment;
     "owner()": FunctionFragment;
+    "randomGenerator()": FunctionFragment;
     "renounceOwnership()": FunctionFragment;
+    "setRandomNumberGenerator(address)": FunctionFragment;
     "setTicketPrice(uint256)": FunctionFragment;
     "ticketPrice()": FunctionFragment;
     "ticketToOwner(uint256)": FunctionFragment;
     "tickets(uint256)": FunctionFragment;
     "transferOwnership(address)": FunctionFragment;
+    "viewTicket(uint256)": FunctionFragment;
     "withdraw()": FunctionFragment;
   };
 
+  encodeFunctionData(functionFragment: "LTY", values?: undefined): string;
   encodeFunctionData(
     functionFragment: "_getAllBalances",
     values?: undefined
@@ -91,10 +98,18 @@ interface LotteryClaimerInterface extends ethers.utils.Interface {
     values: [string, BigNumberish]
   ): string;
   encodeFunctionData(
+    functionFragment: "buyLottyToken",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "buyMultipleRandomTicket",
     values: [BigNumberish]
   ): string;
   encodeFunctionData(functionFragment: "claim", values?: undefined): string;
+  encodeFunctionData(
+    functionFragment: "drawToTicketCount",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(
     functionFragment: "drawToTickets",
     values: [BigNumberish, BigNumberish]
@@ -118,8 +133,16 @@ interface LotteryClaimerInterface extends ethers.utils.Interface {
   ): string;
   encodeFunctionData(functionFragment: "owner", values?: undefined): string;
   encodeFunctionData(
+    functionFragment: "randomGenerator",
+    values?: undefined
+  ): string;
+  encodeFunctionData(
     functionFragment: "renounceOwnership",
     values?: undefined
+  ): string;
+  encodeFunctionData(
+    functionFragment: "setRandomNumberGenerator",
+    values: [string]
   ): string;
   encodeFunctionData(
     functionFragment: "setTicketPrice",
@@ -141,8 +164,13 @@ interface LotteryClaimerInterface extends ethers.utils.Interface {
     functionFragment: "transferOwnership",
     values: [string]
   ): string;
+  encodeFunctionData(
+    functionFragment: "viewTicket",
+    values: [BigNumberish]
+  ): string;
   encodeFunctionData(functionFragment: "withdraw", values?: undefined): string;
 
+  decodeFunctionResult(functionFragment: "LTY", data: BytesLike): Result;
   decodeFunctionResult(
     functionFragment: "_getAllBalances",
     data: BytesLike
@@ -178,10 +206,18 @@ interface LotteryClaimerInterface extends ethers.utils.Interface {
     data: BytesLike
   ): Result;
   decodeFunctionResult(
+    functionFragment: "buyLottyToken",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "buyMultipleRandomTicket",
     data: BytesLike
   ): Result;
   decodeFunctionResult(functionFragment: "claim", data: BytesLike): Result;
+  decodeFunctionResult(
+    functionFragment: "drawToTicketCount",
+    data: BytesLike
+  ): Result;
   decodeFunctionResult(
     functionFragment: "drawToTickets",
     data: BytesLike
@@ -205,7 +241,15 @@ interface LotteryClaimerInterface extends ethers.utils.Interface {
   ): Result;
   decodeFunctionResult(functionFragment: "owner", data: BytesLike): Result;
   decodeFunctionResult(
+    functionFragment: "randomGenerator",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
     functionFragment: "renounceOwnership",
+    data: BytesLike
+  ): Result;
+  decodeFunctionResult(
+    functionFragment: "setRandomNumberGenerator",
     data: BytesLike
   ): Result;
   decodeFunctionResult(
@@ -225,6 +269,7 @@ interface LotteryClaimerInterface extends ethers.utils.Interface {
     functionFragment: "transferOwnership",
     data: BytesLike
   ): Result;
+  decodeFunctionResult(functionFragment: "viewTicket", data: BytesLike): Result;
   decodeFunctionResult(functionFragment: "withdraw", data: BytesLike): Result;
 
   events: {
@@ -282,6 +327,8 @@ export class LotteryClaimer extends BaseContract {
   interface: LotteryClaimerInterface;
 
   functions: {
+    LTY(overrides?: CallOverrides): Promise<[string]>;
+
     _getAllBalances(
       overrides?: CallOverrides
     ): Promise<[BigNumber, BigNumber, BigNumber, BigNumber, BigNumber]>;
@@ -453,14 +500,23 @@ export class LotteryClaimer extends BaseContract {
       ]
     >;
 
+    buyLottyToken(
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
     buyMultipleRandomTicket(
       _amount: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
     claim(
       overrides?: PayableOverrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
+
+    drawToTicketCount(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[BigNumber]>;
 
     drawToTickets(
       arg0: BigNumberish,
@@ -507,7 +563,14 @@ export class LotteryClaimer extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<[string]>;
 
+    randomGenerator(overrides?: CallOverrides): Promise<[string]>;
+
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<ContractTransaction>;
+
+    setRandomNumberGenerator(
+      _IRandomNumberGenerator: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
@@ -535,10 +598,17 @@ export class LotteryClaimer extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
 
+    viewTicket(
+      _ticketId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[[number, number, number, number, number], BigNumber, boolean]>;
+
     withdraw(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<ContractTransaction>;
   };
+
+  LTY(overrides?: CallOverrides): Promise<string>;
 
   _getAllBalances(
     overrides?: CallOverrides
@@ -680,14 +750,23 @@ export class LotteryClaimer extends BaseContract {
     })[]
   >;
 
+  buyLottyToken(
+    overrides?: PayableOverrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
   buyMultipleRandomTicket(
     _amount: BigNumberish,
-    overrides?: PayableOverrides & { from?: string | Promise<string> }
+    overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   claim(
     overrides?: PayableOverrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
+
+  drawToTicketCount(
+    arg0: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<BigNumber>;
 
   drawToTickets(
     arg0: BigNumberish,
@@ -734,7 +813,14 @@ export class LotteryClaimer extends BaseContract {
 
   owner(overrides?: CallOverrides): Promise<string>;
 
+  randomGenerator(overrides?: CallOverrides): Promise<string>;
+
   renounceOwnership(
+    overrides?: Overrides & { from?: string | Promise<string> }
+  ): Promise<ContractTransaction>;
+
+  setRandomNumberGenerator(
+    _IRandomNumberGenerator: string,
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
@@ -759,11 +845,18 @@ export class LotteryClaimer extends BaseContract {
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
+  viewTicket(
+    _ticketId: BigNumberish,
+    overrides?: CallOverrides
+  ): Promise<[[number, number, number, number, number], BigNumber, boolean]>;
+
   withdraw(
     overrides?: Overrides & { from?: string | Promise<string> }
   ): Promise<ContractTransaction>;
 
   callStatic: {
+    LTY(overrides?: CallOverrides): Promise<string>;
+
     _getAllBalances(
       overrides?: CallOverrides
     ): Promise<[BigNumber, BigNumber, BigNumber, BigNumber, BigNumber]>;
@@ -925,12 +1018,19 @@ export class LotteryClaimer extends BaseContract {
       })[]
     >;
 
+    buyLottyToken(overrides?: CallOverrides): Promise<void>;
+
     buyMultipleRandomTicket(
       _amount: BigNumberish,
       overrides?: CallOverrides
     ): Promise<void>;
 
     claim(overrides?: CallOverrides): Promise<BigNumber>;
+
+    drawToTicketCount(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
 
     drawToTickets(
       arg0: BigNumberish,
@@ -977,7 +1077,14 @@ export class LotteryClaimer extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<string>;
 
+    randomGenerator(overrides?: CallOverrides): Promise<string>;
+
     renounceOwnership(overrides?: CallOverrides): Promise<void>;
+
+    setRandomNumberGenerator(
+      _IRandomNumberGenerator: string,
+      overrides?: CallOverrides
+    ): Promise<void>;
 
     setTicketPrice(
       _newPrice: BigNumberish,
@@ -1003,6 +1110,11 @@ export class LotteryClaimer extends BaseContract {
       overrides?: CallOverrides
     ): Promise<void>;
 
+    viewTicket(
+      _ticketId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<[[number, number, number, number, number], BigNumber, boolean]>;
+
     withdraw(overrides?: CallOverrides): Promise<void>;
   };
 
@@ -1025,6 +1137,8 @@ export class LotteryClaimer extends BaseContract {
   };
 
   estimateGas: {
+    LTY(overrides?: CallOverrides): Promise<BigNumber>;
+
     _getAllBalances(overrides?: CallOverrides): Promise<BigNumber>;
 
     _getAllDraws(overrides?: CallOverrides): Promise<BigNumber>;
@@ -1064,13 +1178,22 @@ export class LotteryClaimer extends BaseContract {
       overrides?: CallOverrides
     ): Promise<BigNumber>;
 
+    buyLottyToken(
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
     buyMultipleRandomTicket(
       _amount: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
     claim(
       overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    drawToTicketCount(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<BigNumber>;
 
     drawToTickets(
@@ -1100,7 +1223,14 @@ export class LotteryClaimer extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<BigNumber>;
 
+    randomGenerator(overrides?: CallOverrides): Promise<BigNumber>;
+
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<BigNumber>;
+
+    setRandomNumberGenerator(
+      _IRandomNumberGenerator: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
@@ -1123,12 +1253,19 @@ export class LotteryClaimer extends BaseContract {
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
 
+    viewTicket(
+      _ticketId: BigNumberish,
+      overrides?: CallOverrides
+    ): Promise<BigNumber>;
+
     withdraw(
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<BigNumber>;
   };
 
   populateTransaction: {
+    LTY(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     _getAllBalances(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
     _getAllDraws(overrides?: CallOverrides): Promise<PopulatedTransaction>;
@@ -1168,13 +1305,22 @@ export class LotteryClaimer extends BaseContract {
       overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
+    buyLottyToken(
+      overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
     buyMultipleRandomTicket(
       _amount: BigNumberish,
-      overrides?: PayableOverrides & { from?: string | Promise<string> }
+      overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
     claim(
       overrides?: PayableOverrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    drawToTicketCount(
+      arg0: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     drawToTickets(
@@ -1207,7 +1353,14 @@ export class LotteryClaimer extends BaseContract {
 
     owner(overrides?: CallOverrides): Promise<PopulatedTransaction>;
 
+    randomGenerator(overrides?: CallOverrides): Promise<PopulatedTransaction>;
+
     renounceOwnership(
+      overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    setRandomNumberGenerator(
+      _IRandomNumberGenerator: string,
       overrides?: Overrides & { from?: string | Promise<string> }
     ): Promise<PopulatedTransaction>;
 
@@ -1231,6 +1384,11 @@ export class LotteryClaimer extends BaseContract {
     transferOwnership(
       newOwner: string,
       overrides?: Overrides & { from?: string | Promise<string> }
+    ): Promise<PopulatedTransaction>;
+
+    viewTicket(
+      _ticketId: BigNumberish,
+      overrides?: CallOverrides
     ): Promise<PopulatedTransaction>;
 
     withdraw(

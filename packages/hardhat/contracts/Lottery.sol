@@ -5,12 +5,17 @@ import './LotteryClaimer.sol';
 
 contract Lottery is LotteryClaimer {
   using SafeMath for uint256;
-  uint256 private delay = 6 hours;
+  uint256 private delay = 30 seconds;
+
+  event DrawDone();
+
+  constructor(address _LTY) LotteryClaimer(_LTY) {}
 
   function draw() public returns (bool) {
     bool success = false;
     if (needToDraw()) {
       success = processDraw();
+      emit DrawDone();
     }
     return success;
   }

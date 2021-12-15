@@ -1,22 +1,35 @@
 import { formatEther } from '@ethersproject/units'
-import { Collapse, Spin, Typography, Button } from 'antd'
-import { ContractBalances } from 'src/views/Lottery'
+import { Spin, Button } from 'antd'
 import { Balance } from '../../views/Lottery'
+import { round } from '../../helpers/utils'
+import { COIN_NAME } from 'src/config/constants'
+import { FC, useState } from 'react'
 
 interface IClaimTabProps {
-  claimFunction: () => void
+  claimFunction: () => Promise<void>
   claimableAmount: string | undefined
 }
 
-const ClaimTab = ({ claimFunction, claimableAmount }: IClaimTabProps) => {
-  // if (!contractBalances) {
-  //   return <Spin />
-  // }
+const ClaimTab: FC<IClaimTabProps> = ({
+  claimFunction,
+  claimableAmount,
+}: IClaimTabProps) => {
+  const [loading, setLoading] = useState(false)
+
+  const onClaim = async (): Promise<void> => {
+    setLoading(true)
+    await claimFunction()
+    setLoading(false)
+  }
+
   return (
     <>
       <Balance>
         💰 You earned :{' '}
-        {claimableAmount ? formatEther(claimableAmount) : 'Loading...'} ETH
+        {claimableAmount
+          ? round(Number(formatEther(claimableAmount)), 6)
+          : 'Loading...'}{' '}
+        {COIN_NAME}
       </Balance>
       <Button
         type="primary"
@@ -26,11 +39,14 @@ const ClaimTab = ({ claimFunction, claimableAmount }: IClaimTabProps) => {
           justifyContent: 'center',
           alignItems: 'center',
           display: 'flex',
-          margin: 20,
+          margin: '20px auto',
         }}
-        onClick={claimFunction}
+        onClick={onClaim}
+        disabled={
+          typeof claimableAmount === undefined || Number(claimableAmount) <= 0
+        }
       >
-        Claim all
+        {loading ? <Spin /> : `Claim all`}
       </Button>
     </>
   )

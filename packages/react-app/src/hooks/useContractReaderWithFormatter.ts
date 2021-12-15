@@ -24,15 +24,19 @@ import { useIsMounted } from 'usehooks-ts'
 export const useContractReaderWithFormatter = <OutputT, OutputFormat>(
   contract: BaseContract,
   contractFunctionInfo: TContractFunctionInfo,
-  formatter: (_value: OutputT | undefined) => OutputFormat | undefined
+  formatter: (_value: OutputT | undefined) => OutputFormat | undefined,
+  debug: string = 'debug'
   // onChange?: (_value?: OutputT) => void
 ): OutputFormat | undefined => {
   const isMounted = useIsMounted()
   const [value, setValue] = useState<OutputFormat>()
+
   const blockNumber = useBlockNumberContext()
   const ethersContext = useEthersContext()
 
   const callContractFunction = useCallback(async () => {
+    console.log(contractFunctionInfo.functionArgs)
+
     const contractFunction = contract.functions?.[
       contractFunctionInfo.functionName
     ] as ContractFunction<OutputT>
@@ -95,6 +99,7 @@ export const useContractReaderWithFormatter = <OutputT, OutputFormat>(
     }
   }, [
     contractProvider,
+    // contract,
     callContractFunction,
     ethersContext?.chainId,
     formatter,
@@ -102,6 +107,7 @@ export const useContractReaderWithFormatter = <OutputT, OutputFormat>(
   ])
 
   useEffect(() => {
+    // console.log(debug)
     void callFunc()
   }, [blockNumber, callFunc])
 

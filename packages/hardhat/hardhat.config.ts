@@ -108,9 +108,24 @@ const config: HardhatUserConfig = {
         mnemonic: getMnemonic(),
       },
     },
+    mumbai: {
+      url: 'https://rpc-mumbai.maticvigil.com',
+      gasPrice: 1000000000,
+      accounts: {
+        mnemonic: getMnemonic(),
+      },
+    },
     matic: {
       url: 'https://rpc-mainnet.maticvigil.com/',
       gasPrice: 1000000000,
+      accounts: {
+        mnemonic: getMnemonic(),
+      },
+    },
+    neon: {
+      chainId: 245022926,
+      url: 'https://proxy.devnet.neonlabs.org/solana',
+      timeout: 500000,
       accounts: {
         mnemonic: getMnemonic(),
       },
@@ -144,6 +159,15 @@ const config: HardhatUserConfig = {
             runs: 200,
           },
         },
+      },
+      {
+        version: '0.6.6',
+      },
+      {
+        version: '0.6.0',
+      },
+      {
+        version: '0.4.24',
       },
     ],
   },

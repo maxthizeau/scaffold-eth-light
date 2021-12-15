@@ -1,4 +1,3 @@
-const del = require('del')
 const gulp = require('gulp')
 const gulpless = require('gulp-less')
 const postcss = require('gulp-postcss')
@@ -26,6 +25,6 @@ gulp.task('less', function (done) {
         debug: true,
       })
     )
-    .pipe(gulp.dest('./public'))
+    .pipe(gulp.dest('./src/themes/generated'))
   done()
 })

@@ -1,23 +1,24 @@
+/* eslint-disable react-hooks/exhaustive-deps */
 import React, { FC, useContext, useMemo, useState } from 'react'
 import { Button } from 'antd'
-import { useBalance } from 'eth-hooks'
 import { transactor } from 'eth-components/functions'
 import { parseEther } from '@ethersproject/units'
 import { EthComponentsSettingsContext } from 'eth-components/models'
 import { IScaffoldAppProviders } from 'src/hooks/useScaffoldAppProviders'
-import { utils } from 'ethers'
+import { BigNumber, utils } from 'ethers'
 import { IEthersContext, useEthersContext } from 'eth-hooks/context'
 import { useDebounce } from 'use-debounce'
 
 interface IFaucetButton {
   scaffoldAppProviders: IScaffoldAppProviders
+  // ethersContext: IEthersContext
   gasPrice: number | undefined
 }
 
 export const getFaucetAvailable = (
   scaffoldAppProviders: IScaffoldAppProviders,
   ethersContext: IEthersContext
-) => {
+): boolean => {
   return (
     (true &&
       ethersContext?.ethersProvider &&
@@ -30,7 +31,8 @@ export const getFaucetAvailable = (
 export const FaucetHintButton: FC<IFaucetButton> = (props) => {
   const settingsContext = useContext(EthComponentsSettingsContext)
   const ethersContext = useEthersContext()
-  const yourLocalBalance = useBalance(ethersContext.account ?? '')
+  const yourLocalBalance = BigNumber.from(0)
+  // const yourLocalBalance = useBalance(ethersContext.account ?? '')
   const signer = props.scaffoldAppProviders.localProvider.getSigner()
   /**
    * create transactor for faucet
@@ -68,8 +70,22 @@ export const FaucetHintButton: FC<IFaucetButton> = (props) => {
       ethersContext?.account != null
     ) {
       return (
-        <div style={{ paddingTop: 10, paddingLeft: 10 }}>
+        <div
+          style={{
+            paddingLeft: 10,
+            paddingRight: 10,
+            // display: 'flex',
+            // justifyContent: 'center',
+          }}
+        >
           <Button
+            style={{
+              width: '100%',
+              padding: '27px',
+              display: 'flex',
+              justifyContent: 'center',
+              alignItems: 'center',
+            }}
             type="primary"
             onClick={(): void => {
               if (faucetTx && ethersContext?.account != null) {
@@ -89,7 +105,7 @@ export const FaucetHintButton: FC<IFaucetButton> = (props) => {
     } else {
       return <></>
     }
-  }, [faucetAvailable, yourLocalBalance, faucetTx, ethersContext?.account])
+  }, [])
 
   return <> {faucetHint} </>
 }

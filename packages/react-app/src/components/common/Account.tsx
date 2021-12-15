@@ -12,7 +12,7 @@ import React, { FC, useState } from 'react'
 import { useDebounce } from 'use-debounce'
 import { useIsMounted } from 'usehooks-ts'
 
-import { Address, Balance, Wallet } from 'eth-components/ant'
+// import { Address, Balance, Wallet } from 'eth-components/ant'
 
 export interface IAccountProps {
   ensProvider: StaticJsonRpcProvider | undefined
@@ -101,9 +101,7 @@ export const Account: FC<IAccountProps> = (props: IAccountProps) => {
         <Button
           loading={loadingButtonDebounce.isPending()}
           key="loginbutton"
-          style={{ verticalAlign: 'top', marginLeft: 8, marginTop: 4 }}
-          shape="round"
-          size="large"
+          style={{ alignSelf: 'center', marginLeft: 8 }}
           onClick={handleLoginClick}
         >
           Connect
@@ -117,9 +115,9 @@ export const Account: FC<IAccountProps> = (props: IAccountProps) => {
       {!showLoadModal && props.createLoginConnector && (
         <Button
           key="logoutbutton"
-          style={{ verticalAlign: 'top', marginLeft: 8, marginTop: 4 }}
-          shape="round"
-          size="large"
+          style={{ alignSelf: 'center', marginLeft: 8 }}
+          // shape="round"
+          // size="large"
           onClick={ethersContext.disconnectModal}
         >
           Logout
@@ -129,10 +127,35 @@ export const Account: FC<IAccountProps> = (props: IAccountProps) => {
   )
 
   const display = (
-    <span>
+    <>
       {resolvedAddress != null && (
         <>
-          <Address
+          <div
+            style={{
+              alignContent: 'center',
+              display: 'flex',
+              flexDirection: 'column',
+              margin: '0 10px',
+            }}
+          >
+            <div style={{ fontSize: '0.75em', lineHeight: '1.2em' }}>
+              Connected as
+            </div>
+            <br />
+
+            <a
+              href={`${props.blockExplorer}/${resolvedAddress}`}
+              target="_blank"
+              rel="noreferrer"
+              style={{ fontSize: '0.9em', lineHeight: '1.4em' }}
+            >
+              {resolvedAddress.substr(0, 5) +
+                '...' +
+                resolvedAddress.substr(-2)}
+            </a>
+          </div>
+
+          {/* <Address
             punkBlockie
             address={resolvedAddress}
             fontSize={props.fontSize}
@@ -149,14 +172,14 @@ export const Account: FC<IAccountProps> = (props: IAccountProps) => {
               price={props.price}
               color={'#1890ff'}
             />
-          )}
+          )} */}
         </>
       )}
-    </span>
+    </>
   )
 
   return (
-    <div>
+    <div style={{ display: 'flex', alignContent: 'center' }}>
       {display}
       {props.hasContextConnect && (
         <>

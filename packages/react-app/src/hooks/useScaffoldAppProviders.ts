@@ -1,5 +1,4 @@
 import { StaticJsonRpcProvider } from '@ethersproject/providers'
-// import input from 'antd/lib/input';
 import { TEthersProvider, TNetworkInfo } from 'eth-hooks/models'
 import { useCallback, useEffect, useState } from 'react'
 import { ICoreOptions } from 'web3modal'
@@ -8,13 +7,12 @@ import {
   useEthersContext,
   CreateEthersModalConnector,
 } from 'eth-hooks/context'
-// import { useThemeSwitcher } from 'react-css-theme-switcher';
+
 import {
   mainnetProvider,
   localProvider,
   targetNetworkInfo,
 } from '../config/providersConfig'
-import { web3ModalConfig } from '../config/web3ModalConfig'
 
 export interface IScaffoldAppProviders {
   currentProvider: TEthersProvider | undefined
@@ -30,8 +28,13 @@ export const useScaffoldProviders = (): IScaffoldAppProviders => {
 
   useEffect(() => {
     // import async to split bundles
+    const importedConfig = import('../config/web3ModalConfig')
 
-    setWeb3Config(web3ModalConfig)
+    importedConfig.then((getter) => {
+      getter.getWeb3ModalConfig().then((config) => {
+        setWeb3Config(config)
+      })
+    })
   }, [])
 
   const createLoginConnector: CreateEthersModalConnector = useCallback(
@@ -53,8 +56,7 @@ export const useScaffoldProviders = (): IScaffoldAppProviders => {
       const connector = createLoginConnector()
       if (connector) ethersContext.activate(connector)
     }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [web3Config])
+  }, [web3Config, createLoginConnector, ethersContext])
 
   return {
     currentProvider: ethersContext.ethersProvider ?? localProvider,

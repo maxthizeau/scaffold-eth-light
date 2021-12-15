@@ -3,9 +3,8 @@ import { FC } from 'react'
 import 'antd/dist/antd.css'
 import './App.css'
 import { Route, Routes } from 'react-router-dom'
-import { Home } from './views/Home'
+import { HowToPlayPage } from './views/HowToPlayPage'
 
-import TestPage from './views/TestPage'
 import { PageLayout } from 'src/components/PageLayout'
 
 import { useEthersContext } from 'eth-hooks/context'
@@ -14,11 +13,13 @@ import { useDexEthPrice } from 'eth-hooks/dapps'
 import { useScaffoldProviders as useScaffoldAppProviders } from 'src/hooks/useScaffoldAppProviders'
 import { useBurnerFallback } from 'src/hooks/useBurnerFallback'
 import { getNetworkInfo } from './helpers/getNetworkInfo'
-import { FullContract } from './views/FullContract'
 import { useAppContracts } from './hooks/useAppContracts'
-// import { useAppContracts } from './hooks/useAppContracts'
-import { NETWORKS } from 'src/config/constants'
+
 import { Lottery } from './views/Lottery'
+import { Swap } from './views/Swap'
+import { LotteryResult } from './views/LotteryResult'
+import { LottyToken } from './generated/contract-types/LottyToken'
+import { useSimpleContractReader } from './hooks/useSimpleContractReader'
 
 const App: FC = () => {
   // 🛰 providers
@@ -37,7 +38,9 @@ const App: FC = () => {
   )
 
   const yourCurrentBalance = useBalance(ethersContext.account ?? '')
+  // const yourCurrentBalance = BigNumber.from(12)
 
+  // const gasPrice = 1000000000
   const gasPrice = useGasPrice(
     ethersContext.chainId,
     'fast',
@@ -45,10 +48,28 @@ const App: FC = () => {
   )
 
   const appContractConfig = useAppContracts()
-  const mainnetContracts = useContractLoader(
+  const readContracts = useContractLoader(appContractConfig)
+  const writeContracts = useContractLoader(
     appContractConfig,
-    scaffoldAppProviders.mainnetProvider,
-    NETWORKS['mainnet'].chainId
+    ethersContext.signer
+  )
+  // console.log(scaffoldAppProviders.currentProvider)
+  // console.log(ethersContext.chainId)
+  // const gasPrice = useGasPrice(ethersContext.chainId, 'fast')
+  // const mainnetContracts = useContractLoader(
+  //   appContractConfig,
+  //   scaffoldAppProviders.mainnetProvider,
+  //   NETWORKS['mainnet'].chainId
+  // )
+  const userAddress = ethersContext.account
+
+  const ltyBalance = useSimpleContractReader<string, LottyToken>(
+    readContracts,
+    'LottyToken',
+    'balanceOf',
+    [ethersContext.account],
+    (_value) => _value.toString(),
+    [{ ifIsUndefined: ethersContext.account, default: undefined }]
   )
 
   return (
@@ -57,32 +78,56 @@ const App: FC = () => {
         scaffoldAppProviders={scaffoldAppProviders}
         price={ethPrice}
         gasPrice={gasPrice ?? 0}
+        ltyBalance={ltyBalance ?? '0'}
       >
         <Routes>
-          <Route path="/" element={<Home />}></Route>
-        </Routes>
-
-        <Routes>
-          <Route path="/test-page" element={<TestPage />}></Route>
-        </Routes>
-        <Routes>
-          <Route path="/lottery" element={<Lottery />}></Route>
-        </Routes>
-        <Routes>
           <Route
-            path="/full"
+            path="/"
             element={
-              <FullContract
-                scaffoldAppProviders={scaffoldAppProviders}
-                appContractConfig={appContractConfig}
-                mainnetContracts={mainnetContracts}
+              <Lottery
+                ethersContext={ethersContext}
+                readContracts={readContracts}
+                writeContracts={writeContracts}
+                gasPrice={gasPrice}
+                ltyBalance={ltyBalance ?? '0'}
+                userAddress={userAddress ?? ''}
               />
             }
-          ></Route>
-        </Routes>
+          />
 
-        {/* <ThemeSwitcher /> */}
+          <Route
+            path="/results"
+            element={
+              <LotteryResult
+                readContracts={readContracts}
+                writeContracts={writeContracts}
+                gasPrice={gasPrice}
+                ltyBalance={ltyBalance ?? '0'}
+              />
+            }
+          />
+
+          <Route
+            path="/swap"
+            element={<Swap yourCurrentBalance={yourCurrentBalance} />}
+          />
+
+          <Route
+            path="/how-to-play"
+            element={
+              <HowToPlayPage
+                ethersContext={ethersContext}
+                readContracts={readContracts}
+                writeContracts={writeContracts}
+                gasPrice={gasPrice}
+                ltyBalance={ltyBalance ?? '0'}
+                userAddress={userAddress ?? ''}
+              />
+            }
+          />
+        </Routes>
       </PageLayout>
+      {/* <ThemeSwitcher /> */}
     </>
   )
 }

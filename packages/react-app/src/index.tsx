@@ -5,7 +5,7 @@ import App from './App'
 import reportWebVitals from './reportWebVitals'
 import { ApolloClient, ApolloProvider, InMemoryCache } from '@apollo/client'
 import { BrowserRouter } from 'react-router-dom'
-import { ThemeSwitcherProvider } from 'react-css-theme-switcher'
+
 import { BLOCKNATIVE_DAPPID } from 'src/config/constants'
 import { ErrorBoundary, ErrorFallback } from './components/ErrorFallback'
 import { EthersAppContext } from 'eth-hooks/context'
@@ -15,13 +15,16 @@ import {
 } from 'eth-components/models'
 import { Suspense } from 'react'
 
-const themes = {
-  dark: `./dark-theme.css`,
-  light: `./light-theme.css`,
-}
+import './themes/generated/main-theme.css'
+
+// const themes = {
+//   dark: `./dark-theme.css`,
+//   light: `./light-theme.css`,
+//   default: `./main-theme.css`,
+// }
 // console.log(process.env.PUBLIC_URL)
-const prevTheme =
-  typeof window !== 'undefined' ? window.localStorage.getItem('theme') : null
+// const prevTheme =
+//   typeof window !== 'undefined' ? window.localStorage.getItem('theme') : null
 
 const subgraphUri =
   'http://localhost:8000/subgraphs/name/scaffold-eth/your-contract'
@@ -44,16 +47,18 @@ ReactDOM.render(
       <EthComponentsSettingsContext.Provider value={context}>
         <EthersAppContext>
           <ErrorBoundary FallbackComponent={ErrorFallback}>
-            <ThemeSwitcherProvider
+            {/* <ThemeSwitcherProvider
               themeMap={themes}
               defaultTheme={prevTheme || 'dark'}
-            >
-              <BrowserRouter>
-                <Suspense fallback={<div />}>
-                  <App />
-                </Suspense>
-              </BrowserRouter>
-            </ThemeSwitcherProvider>
+            > */}
+
+            <BrowserRouter>
+              <Suspense fallback={<div />}>
+                <App />
+              </Suspense>
+            </BrowserRouter>
+
+            {/* </ThemeSwitcherProvider> */}
           </ErrorBoundary>
         </EthersAppContext>
       </EthComponentsSettingsContext.Provider>

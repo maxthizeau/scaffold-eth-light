@@ -33,7 +33,7 @@ contract LotteryDrawer is LotteryFactory {
 
   Draw[] public draws;
 
-  constructor() {
+  constructor(address _LTY) LotteryFactory(_LTY) {
     uint256[6] memory rewardsByWinningNumber = [zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256];
     uint32[6] memory winnersByWinningNumber = [zeroAsU32, zeroAsU32, zeroAsU32, zeroAsU32, zeroAsU32, zeroAsU32];
 
@@ -50,7 +50,8 @@ contract LotteryDrawer is LotteryFactory {
 
   function processDraw() internal returns (bool) {
     uint256 drawCount = draws.length.sub(1);
-    uint8[5] memory drawNumbers = generateRandomTicketNumbers(drawCount);
+    uint256 randomSeed = uint256(randomGenerator.getRandomNumber(drawCount));
+    uint8[5] memory drawNumbers = generateRandomTicketNumbers(randomSeed);
     uint32[6] memory winnersByWinningNumber = [uint32(0), uint32(0), uint32(0), uint32(0), uint32(0), uint32(0)];
     uint256[6] memory rewardsByWinningNumber = [zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256, zeroAsU256];
 

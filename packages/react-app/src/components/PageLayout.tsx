@@ -1,19 +1,20 @@
 import React, { ReactElement, ReactNode } from 'react'
-import { Descriptions, PageHeader, Menu } from 'antd'
-import { ThemeSwitcher } from './ThemeSwitcher'
+import { Menu, Layout } from 'antd'
 import { useLocation, Link } from 'react-router-dom'
 import { Account } from './common/Account'
-import { StaticJsonRpcProvider } from '@ethersproject/providers'
 import { IScaffoldAppProviders } from '../hooks/useScaffoldAppProviders'
 import PageLayoutFooter from './PageLayoutFooter'
-import { FaucetHintButton } from './common/FaucetHintButton'
-import { useGasPrice } from 'eth-hooks'
+import { formatEther } from '@ethersproject/units'
+import { round } from '../helpers/utils'
+
+const { Header, Content, Footer } = Layout
 
 interface IPageLayoutProps {
   children: ReactNode
   scaffoldAppProviders: IScaffoldAppProviders
   price: number
   gasPrice: number
+  ltyBalance: string
 }
 
 export const PageLayout = ({
@@ -21,6 +22,7 @@ export const PageLayout = ({
   scaffoldAppProviders,
   price,
   gasPrice,
+  ltyBalance,
 }: IPageLayoutProps): ReactElement => {
   const location = useLocation()
 
@@ -30,67 +32,78 @@ export const PageLayout = ({
 
   return (
     <>
-      <PageHeader
-        ghost={false}
-        title="My Scaffold"
-        subTitle="This is my own starter template"
-        style={{ padding: 20 }}
-        extra={[
-          <Account
-            key="1"
-            createLoginConnector={scaffoldAppProviders.createLoginConnector}
-            ensProvider={scaffoldAppProviders.mainnetProvider}
-            hasContextConnect={true}
-            blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
+      <Layout>
+        <Header
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            textAlign: 'center',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+            background: 'inherit',
+            borderBottom: '1px solid #424242',
+          }}
+        >
+          <div style={{ marginLeft: '25px' }}>
+            <Link to="/">
+              <img src="lotty-logo.png" style={{ height: '25px' }} />
+            </Link>
+          </div>
+          <Menu
+            style={{
+              flexGrow: '1',
+              textAlign: 'center',
+              justifyContent: 'center',
+              background: 'inherit',
+              border: 'none',
+            }}
+            selectedKeys={[location.pathname]}
+            mode="horizontal"
+          >
+            <Menu.Item key="/">
+              <Link to="/">Lottery</Link>
+            </Menu.Item>
+            <Menu.Item key="/results">
+              <Link to="/results">Results</Link>
+            </Menu.Item>
+            <Menu.Item key="/swap">
+              <Link to="/swap">Swap</Link>
+            </Menu.Item>
+            <Menu.Item key="/how-to-play">
+              <Link to="/how-to-play">How to play ?</Link>
+            </Menu.Item>
+          </Menu>
+          <div style={{ marginRight: '25px', lineHeight: '1.2em' }}>
+            {round(Number(formatEther(ltyBalance)), 4)}
+            <img
+              style={{
+                width: '20px',
+                height: '20px',
+                marginBottom: '3px',
+                marginLeft: '5px',
+              }}
+              src="/lty-sig.png"
+            />
+          </div>
+          <div style={{ marginRight: '25px', lineHeight: '1.2em' }}>
+            <Account
+              createLoginConnector={scaffoldAppProviders.createLoginConnector}
+              ensProvider={scaffoldAppProviders.mainnetProvider}
+              hasContextConnect={true}
+              blockExplorer={scaffoldAppProviders.targetNetwork.blockExplorer}
+              price={price}
+            />
+          </div>
+        </Header>
+        <Content>{children}</Content>
+        <Footer>
+          <PageLayoutFooter
             price={price}
-            fontSize={14}
-          />,
-        ]}
-      >
-        {' '}
-        {/* <Descriptions size="small" column={3} style={{ padding: 20 }}>
-          <Descriptions.Item label="Address">0x9527d8mb9a</Descriptions.Item>
-          <Descriptions.Item label="Balance">
-            <a>380 ETH</a>
-          </Descriptions.Item>
-          <Descriptions.Item label="Creation Time">
-            2017-01-10
-          </Descriptions.Item>
-        </Descriptions> */}
-      </PageHeader>
-      <Menu
-        style={{
-          textAlign: 'center',
-          justifyContent: 'center',
-          background: 'inherit',
-        }}
-        selectedKeys={[location.pathname]}
-        mode="horizontal"
-      >
-        <Menu.Item key="/">
-          <Link to="/">App Home</Link>
-        </Menu.Item>
-        <Menu.Item key="/debug">
-          <Link to="/debug">Debug Contracts</Link>
-        </Menu.Item>
-        <Menu.Item key="/test-page">
-          <Link to="/test-page">Test Page</Link>
-        </Menu.Item>
-        <Menu.Item key="/full">
-          <Link to="/full">Full Contract</Link>
-        </Menu.Item>
-        <Menu.Item key="/lottery">
-          <Link to="/lottery">Lottery</Link>
-        </Menu.Item>
-      </Menu>
-      {children}
-
-      <PageLayoutFooter
-        price={price}
-        scaffoldAppProviders={scaffoldAppProviders}
-        gasPrice={gasPrice}
-      />
-      <ThemeSwitcher />
+            scaffoldAppProviders={scaffoldAppProviders}
+            gasPrice={gasPrice}
+          />
+        </Footer>
+      </Layout>
     </>
   )
 }

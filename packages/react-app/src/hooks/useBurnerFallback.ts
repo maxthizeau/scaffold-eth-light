@@ -24,6 +24,7 @@ export const useBurnerFallback = (
   const localAddress = useUserAddress(appProviders.localProvider.getSigner())
 
   useEffect(() => {
+    console.log('Burner fallback')
     /**
      * if the current provider is local provider then use the burner fallback
      */
